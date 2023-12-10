@@ -1,44 +1,48 @@
+#!/usr/bin/python3
 from datetime import datetime
 import uuid
 
 class BaseModel:
-     """
-    Base class for other models.
+    """Class from which all other classes will inherit"""
 
-    Attributes:
-        id (str): A unique identifier in hexadecimal format.
-        created_at (datetime): The date and time when the instance was created (in UTC).
-        updated_at (datetime): The date and time when the instance was last updated (in UTC).
-    """
+    def __init__(self, *args, **kwargs):
+        """Initializes instance attributes
 
-    id = uuid.uuid4().hex # Assign unique id upon creation of a new instance
-    created_at = datetime.utcnow() # Assign current time when an instance was created
-    updated_at = created_at
+        Args:
+            - *args: list of arguments
+            - **kwargs: dict of key-values arguments
+        """
+        if kwargs:
+            for key, value in kwargs.items():
+                if key == "created_at":
+                    self.__dict__["created_at"] = datetime.strptime(
+                        value, "%Y-%m-%dT%H:%M:%S.%f"
+                    )
+                elif key == "updated_at":
+                    self.__dict__["updated_at"] = datetime.strptime(
+                        value, "%Y-%m-%dT%H:%M:%S.%f"
+                    )
+                else:
+                    self.__dict__[key] = value
+        else:
+            self.id = str(uuid.uuid4())
+            self.created_at = datetime.now()
+            self.updated_at = datetime.now()
 
     def __str__(self):
-        """
-        Return a string representation of the instance.
-
-        Returns:
-            str: A string containing the class name, unique ID, and attribute dictionary.
-        """
-        return f"{self.__class__} ({self.id}) {{{self.__dict__}}}".format(self=self)
+        """Returns official string representation"""
+        return "[{}] ({}) {}".format(
+            type(self).__name__, self.id, self.__dict__
+        )
 
     def save(self):
-        """
-        Update the 'updated_at' attribute with the current UTC time.
-        """
-        self.updated_at = datetime.utcnow()
+        """updates the public instance attribute updated_at"""
+        self.updated_at = datetime.now()
 
     def to_dict(self):
-         """
-        Convert the instance to a dictionary.
-
-        Returns:
-            dict: A dictionary containing the instance's attributes.
-        """
-        d = self.__dict__
-        d['__class__'] = self.__class__
-        d['created_at'] = self.created_at.isoformat()
-        d['updated_at'] = self.updated_at.isoformat()
-        return d
+        """returns a dictionary containing all keys/values of __dict__"""
+        my_dict = self.__dict__.copy()
+        my_dict["__class__"] = type(self).__name__
+        my_dict["created_at"] = my_dict["created_at"].isoformat()
+        my_dict["updated_at"] = my_dict["updated_at"].isoformat()
+        return my_dict
