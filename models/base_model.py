@@ -2,6 +2,7 @@
 from datetime import datetime
 import uuid
 
+
 class BaseModel:
     """Class from which all other classes will inherit"""
 
